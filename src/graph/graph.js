@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import returnWeek5 from '../dataset/week5-2017';
 import customTeamInfo from '../dataset/teamColor';
+import Passing from '../passing/passing';
 
 //let arrayOfData = [];
 class Realgraph extends Component {
 
   constructor(props) {
     super(props)
-    this.state = { chosenData: "", leaving:false}
+    this.state = { chosenData: "", leaving:false, filteredData:["one"]}
     this.arrayOfData = []
     this.color=[]
+    this.filteredDataArr=[];
     this.answer;
     this.runOrPass = [{ "type":"PASS", "count": 0 }, { "type":"RUN", "count": 0 }];
     this.percentageArray={"run":0,"pass":0}
@@ -25,7 +27,6 @@ class Realgraph extends Component {
   componentDidUpdate() {
     this.updateColor()
     this.createGraph();
-  
   }
 
   updateColor(){
@@ -41,13 +42,16 @@ class Realgraph extends Component {
   
   updateChosenTeam() {
     const that = this
+    let filteredData=[];
     this.runOrPass[0].count = 0;
     this.runOrPass[1].count = 0;
     this.answer = this.arrayOfData.filter(function(each) {
       if (each.OffenseTeam == that.props.chosenTeam) {
+        filteredData.push(each)
         return each
       }
     })
+    that.filteredDataArr = filteredData
     return this.answer
   }
 
@@ -135,8 +139,10 @@ class Realgraph extends Component {
           return color(d.data.type);
         })
         .on("click", function(d){
+          that.setState({leaving:d.data.type, filteredData:that.filteredDataArr})
           d3.select(".cleanerWrapper")
             .transition()
+            .style("height","20px")
             .style("opacity", "0").duration(1000)
 
           if(d.data.type=="RUN"){
@@ -146,7 +152,6 @@ class Realgraph extends Component {
             d3.select(".bottomPortion")
               .transition()
               .style("background-color", that.color[1])
-              .style("width", "10vw").duration(1000)
           } else {
             d3.select("#RUN")
               .transition()
@@ -154,12 +159,8 @@ class Realgraph extends Component {
             d3.select(".bottomPortion")
               .transition()
               .style("background-color", that.color[0]).duration(1000)
-              .style("width", "10vw").duration(1000)
 
           }
-
-   
-          // that.setState({ leaving: d.data.type });
         })
 
     svg.selectAll(".typeText")
@@ -185,8 +186,14 @@ class Realgraph extends Component {
         return this.getPercentage(d) })
 }
 
-      render() {
+goToRunOrPass(){
+  console.log("gotorunorpass called")
+  if (this.state.leaving == "PASS") {
+return(<Passing filteredData={this.state.filteredData}/>)
+  }
+}
 
+      render() {
   this.measureRunPass();
 let runPercentage = this.runPercentage();
 let passPercentage = this.passPercentage();
@@ -197,6 +204,7 @@ return (
         <div className="runPercentage" >{runPercentage}</div>
         <div className="passPercentage">{passPercentage}</div>
         </div>
+    {this.goToRunOrPass()}
       </div>
     );
   }
