@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import returnWeek5 from '../dataset/week5-2017';
+import customTeamInfo from '../dataset/teamColor';
 
 //let arrayOfData = [];
 class Realgraph extends Component {
@@ -9,8 +10,10 @@ class Realgraph extends Component {
     super(props)
     this.state = { chosenData: "" }
     this.arrayOfData = []
+    this.color=[]
     this.answer;
-    this.runOrPass = [{ "type":"pass", "count": 0 }, { "type":"run", "count": 0 }];
+    this.runOrPass = [{ "type":"PASS", "count": 0 }, { "type":"RUN", "count": 0 }];
+    this.percentageArray={"run":0,"pass":0}
   }
 
   componentWillMount() {
@@ -20,9 +23,14 @@ class Realgraph extends Component {
   componentDidMount() {}
 
   componentDidUpdate() {
+    this.updateColor()
     this.createGraph();
+  
   }
 
+  updateColor(){
+    this.color = customTeamInfo()[this.props.chosenTeam].color;
+  }
   updateChosenTeam() {
     const that = this
     this.runOrPass[0].count = 0;
@@ -35,11 +43,33 @@ class Realgraph extends Component {
     return this.answer
   }
 
-  firstFilterToHtml() {
+  getPercentage(count) {
     const that = this;
-    return ( <div> Pass: {that.runOrPass[0].count} Run: {that.runOrPass[1].count} </div>)
+    let percent = (count / (that.runOrPass[0].count + that.runOrPass[1].count)) * 100
+    return (Math.round(percent * 10) / 10 + "%")
   }
 
+  runPercentage() {
+    const that = this;
+    let answer = this.getPercentage(that.runOrPass[1].count)
+    console.log("run percentage", answer)
+    if(answer!=="NaN%"){
+    return (<div>{answer} </div>)
+    } else {
+      return <div>0%</div>
+    }
+  }
+
+  passPercentage() {
+    const that = this;
+    let answer = this.getPercentage(that.runOrPass[0].count)
+    console.log("pass percentage", answer)
+    if (answer !== "NaN%") {
+    return (<div>{answer} </div>)
+    } else {
+      return <div>0%</div>
+    }
+  }
   measureRunPass() {
     const that = this;
     let firstFiltered = this.updateChosenTeam()
@@ -52,6 +82,8 @@ class Realgraph extends Component {
     })
   }
 
+ 
+
   fetchAllData() {
     const that = this;
     d3.csvParse(returnWeek5(), function(d) {
@@ -60,46 +92,73 @@ class Realgraph extends Component {
   }
 
   createGraph() {
-    let graphHeight = 360;
-    let graphWidth = 360;
-    let radius = Math.min(graphWidth, graphHeight) / 2;
+    d3.select("svg").remove();
 
-    let color = d3.scaleOrdinal()
-      .range(['#A60F2B', '#648C85', '#B3F2C9', '#528C18', '#C3F25C']);
+    var margin = { left: 20, top: 20, right: 20, bottom: 20 },
+      width = Math.min(700, 500) - margin.left - margin.right,
+      height = Math.min(700, 500) - margin.top - margin.bottom;
 
-    let arc = d3.arc()
-      .innerRadius(0)
-      .outerRadius(radius);
+    var svg = d3.select(".pieChart").append("svg")
+      .attr("width", (width + margin.left + margin.right))
+      .attr("height", (height + margin.top + margin.bottom))
+      .append("g").attr("class", "wrapper")
+      .attr("transform", "translate(" + (width / 2 + margin.left) + "," + (height / 2 + margin.top) + ")");
 
-    let svg = d3.select(".barChart")
-      .append("svg")
-      .attr("height", graphHeight)
-      .attr("width", graphWidth)
-      .append('g')
-      .attr('transform', 'translate(' + (graphWidth / 2) + ',' + (graphHeight / 2) + ')');
+    var arc = d3.arc()
+      .innerRadius(width * 0.25 / 2)
+      .outerRadius(width * 0.75 / 2 + 30);
+
+    let color = d3.scaleOrdinal().range(this.color)
 
     let pie = d3.pie()
-      .value(function (d) { return d.count; })
+      .value(function (d) { return(d.count) })
+      .padAngle(.01)
       .sort(null);
 
-    let path = svg.selectAll('path')
+    svg.selectAll('.typeArc')
+        .data(pie(this.runOrPass))
+        .enter()
+        .append('path')
+        .attr("class", "typeArc")
+        .attr("id",function(d){return d.data.type})
+        .attr("d", arc)
+        .attr('fill', function (d) {
+          return color(d.data.type);
+        })
+
+    svg.selectAll(".typeText")
       .data(pie(this.runOrPass))
-      .enter()
-      .append('path')
-      .attr('d', arc)
-      .attr('fill', function (d, i) {
-        return color(d.data.type);
-      });
+      .enter().append("text")
+      .attr("class", "typeText")
+      .attr("dy", -15)
+      .append("textPath")
+      .attr("class", "typeOfPlay")
+      .attr("startOffset", "25%")
+      .style("text-anchor", "middle")
+      .attr("xlink:href", function(d, i) { return "#" + d.data.type; })
+      .text(function(d) { return (d.data.type ) })
+  
+    svg.selectAll(".typeText")
+      .data(pie(this.runOrPass))
+      .enter().append("text")
+      .attr("class", "typeText")
+      .append("textPath")
+      .attr("dy", "3em")
+      .text(function (d) { 
+        this.percentageArray[d.data.type]=d.data.count
+        return this.getPercentage(d) })
 
-  }
+    }
 
-
-render() {
+      render() {
   this.measureRunPass();
-let answer = this.firstFilterToHtml();
+let runPercentage = this.runPercentage();
+let passPercentage = this.passPercentage();
 return (
       <div>
-        <div className="barChart">{answer}</div>
+        <div className="pieChart"></div>
+        <div className="runPercentage">{runPercentage}</div>
+        <div className="passPercentage">{passPercentage}</div>
       </div>
     );
   }

@@ -9,6 +9,7 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
+          <link href="https://fonts.googleapis.com/css?family=Holtwood+One+SC" rel="stylesheet"/>
           <img src={logo} className="App-logo" alt="logo"/>
           <h1 className="App-title">Welcome to Reacto World</h1>
         </header>

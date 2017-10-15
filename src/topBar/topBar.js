@@ -60,7 +60,7 @@ class Graph1 extends Component {
             <input type="radio" name="team" value="MIA" onClick={()=>{this.selectTeam("MIA")}}/>
             MIA
             <input type="radio" name="team" value="MIN" onClick={()=>{this.selectTeam("MIN")}}/>
-            TB
+            MIN
             <input type="radio" name="team" value="NE" onClick={()=>{this.selectTeam("NE")}}/>
             NE
             <input type="radio" name="team" value="NO" onClick={()=>{this.selectTeam("NO")}}/>

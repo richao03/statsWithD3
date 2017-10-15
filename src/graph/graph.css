@@ -1,10 +1,38 @@
-.team-choosing{
-  border:1px solid red;
-  height:20%;
-  width:70%;
-  margin:auto;
+.team-choosing {
+  border: 1px solid red;
+  height: 20%;
+  width: 70%;
+  margin: auto;
 }
 
-input{
-  margin:10px;
+input {
+  margin: 10px;
+}
+.pieChart{
+  display:inline;
+}
+.slice text {
+  font-size: 16pt;
+  font-family: Arial;
+}
+
+.typeOfPlay {
+  font-size: 34pt;
+  font-family: 'Holtwood One SC', serif;
+}
+
+.runPercentage {
+  border:1px solid red;
+  float: left;
+  width: 30vw;
+  font-size: 10vh;
+  font-family: 'Holtwood One SC', serif;
+}
+
+.passPercentage {
+  border:1px solid green;
+  float: right;
+  width: 30vw;
+  font-size: 10vh;
+  font-family: 'Holtwood One SC', serif;
 }
