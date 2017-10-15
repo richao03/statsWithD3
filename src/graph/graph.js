@@ -8,7 +8,7 @@ class Realgraph extends Component {
 
   constructor(props) {
     super(props)
-    this.state = { chosenData: "" }
+    this.state = { chosenData: "", leaving:false}
     this.arrayOfData = []
     this.color=[]
     this.answer;
@@ -29,8 +29,16 @@ class Realgraph extends Component {
   }
 
   updateColor(){
+    d3.select(".cleanerWrapper")
+      .transition()
+      .style("opacity", "1").duration(1000)
+    d3.select(".bottomPortion")
+      .transition()
+      .style("width","")
+      .style("background-color", "white").duration(1000)
     this.color = customTeamInfo()[this.props.chosenTeam].color;
   }
+  
   updateChosenTeam() {
     const that = this
     this.runOrPass[0].count = 0;
@@ -95,8 +103,8 @@ class Realgraph extends Component {
     d3.select("svg").remove();
 
     var margin = { left: 20, top: 20, right: 20, bottom: 20 },
-      width = Math.min(700, 500) - margin.left - margin.right,
-      height = Math.min(700, 500) - margin.top - margin.bottom;
+      width = Math.min(800, 500) - margin.left - margin.right,
+      height = Math.min(800, 500) - margin.top - margin.bottom;
 
     var svg = d3.select(".pieChart").append("svg")
       .attr("width", (width + margin.left + margin.right))
@@ -114,6 +122,7 @@ class Realgraph extends Component {
       .value(function (d) { return(d.count) })
       .padAngle(.01)
       .sort(null);
+    const that = this;
 
     svg.selectAll('.typeArc')
         .data(pie(this.runOrPass))
@@ -124,6 +133,33 @@ class Realgraph extends Component {
         .attr("d", arc)
         .attr('fill', function (d) {
           return color(d.data.type);
+        })
+        .on("click", function(d){
+          d3.select(".cleanerWrapper")
+            .transition()
+            .style("opacity", "0").duration(1000)
+
+          if(d.data.type=="RUN"){
+            d3.select("#PASS")
+            .transition()
+            .style("opacity","0").duration(1000)
+            d3.select(".bottomPortion")
+              .transition()
+              .style("background-color", that.color[1])
+              .style("width", "10vw").duration(1000)
+          } else {
+            d3.select("#RUN")
+              .transition()
+              .style("opacity", "0").duration(1000)
+            d3.select(".bottomPortion")
+              .transition()
+              .style("background-color", that.color[0]).duration(1000)
+              .style("width", "10vw").duration(1000)
+
+          }
+
+   
+          // that.setState({ leaving: d.data.type });
         })
 
     svg.selectAll(".typeText")
@@ -147,18 +183,20 @@ class Realgraph extends Component {
       .text(function (d) { 
         this.percentageArray[d.data.type]=d.data.count
         return this.getPercentage(d) })
-
-    }
+}
 
       render() {
+
   this.measureRunPass();
 let runPercentage = this.runPercentage();
 let passPercentage = this.passPercentage();
 return (
-      <div>
+      <div className="bottomPortion">
+      <div className="cleanerWrapper">
         <div className="pieChart"></div>
-        <div className="runPercentage">{runPercentage}</div>
+        <div className="runPercentage" >{runPercentage}</div>
         <div className="passPercentage">{passPercentage}</div>
+        </div>
       </div>
     );
   }

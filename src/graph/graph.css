@@ -36,3 +36,44 @@ input {
   font-size: 10vh;
   font-family: 'Holtwood One SC', serif;
 }
+
+
+svg{
+  position:absolulte;
+  margin:auto;
+}
+
+.leaveLeft{
+  animation:leaveLeft 1s ease-in;
+}
+@-webkit-keyframes leaveLeft {
+  from {
+    float:left;
+  }
+
+  to {
+    left:-50px;
+  }
+}
+.leaveRight{
+
+}
+
+.animated {
+  animation:pulse 3s forwards;
+}
+@-webkit-keyframes pulse {
+  from {
+    display:inline;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+  -webkit-transform: scale3d(1, 1, 1);
+  transform: scale3d(15, 15, 15);
+  }
+  to {
+  display:none;
+  }
+}
+
